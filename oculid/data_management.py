@@ -14,8 +14,51 @@ SQL_UNIQUENESS_ERROR = "UNIQUE constraint failed: picture.tester_id, picture.tim
 
 
 """
-Saving
+Reading data
 """
+
+def get_testers(test_id):
+    """
+    Return a list of tester ids
+    associated with a given test
+    or None if test does not exist.
+    """
+    test = Test.query.get(test_id)
+    if test is None:
+        return {"result": None, "msg": "Test does not exist"}
+    else:
+        data  = [test.id for test in test.testers]
+        return {"result": data, "msg": "Success"}
+
+
+def get_tester_metadata(tester_id):
+    """
+    Return metadata for a given tester or None
+    """
+    tester = Tester.query.get(tester_id)
+    if tester is None:
+        return {"result": None, "msg": "Tester does not exist"}
+    else:
+        data = tester.get_metadata()
+        return {"result": data, "msg": "Success"}
+
+
+def get_tester_data(tester_id):
+    """
+    Return data for a given tester or None
+    """
+    tester = Tester.query.get(tester_id)
+    if tester is None:
+        return {"result": None, "msg": "Tester does not exist"}
+    else:
+        data = tester.get_data()
+        return {"result": data, "msg": "Success"}
+
+
+"""
+Writing data
+"""
+
 def save_pictures_set_pathes(pics_list, tester_id, tester_folder):
     """
     pic list  -- list of werkzeug.datastructures.FileStorage

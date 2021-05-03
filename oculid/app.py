@@ -30,7 +30,41 @@ from oculid.data_management import *
 Register our routes down below
 """
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/tester/<id>', methods=['GET'])
+def tester(id):
+    """
+    Return a list of tester ids associated with a given
+    test
+    """
+    logger("Tester called for id %s " % id)
+    if request.method == 'GET':
+        return get_tester_data(id)
+
+
+@app.route('/tester/<id>/metadata', methods=['GET'])
+def tester_metadata(id):
+    """
+    Return a list of tester ids associated with a given
+    test
+    """
+    logger("Tester metadata called for id %s " % id)
+    if request.method == 'GET':
+        return get_tester_metadata(id)
+
+
+@app.route('/test/<id>', methods=['GET'])
+def test(id):
+    """
+    Return a list of tester ids associated with a given
+    test
+    """
+    logger("Test called for id %s " % id)
+    if request.method == 'GET':
+        return get_testers(id)
+
+
+
+@app.route('/upload', methods=['POST'])
 def upload_file():
     logger("Upload called")
     if request.method == 'POST':
@@ -75,11 +109,16 @@ def upload_file():
         if not res:
             abort(400, data)
 
+        # The rest of these functions are returning success codes,
+        # based off data validation. Would introduce something similar going
+        # forward for pictures. For now, assume the saving works or raises.
         pics_list = request.files.getlist('pics')
         save_pictures_set_pathes(pics_list, tester_id, tester_folder)
 
+        # Check that the tester's pictures and video have paths set
+        # as proxy for successful data upload
         tester = Tester.query.filter_by(id=tester_id).first()
         if not tester.pictures_uploaded or not tester.video_uploaded:
-            abort(400, "Video and pictures not uploaded successfully")
+            abort(400, "Video or pictures not uploaded successfully")
         else:
             return "Success"

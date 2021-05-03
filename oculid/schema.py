@@ -6,7 +6,7 @@ class Video(db.Model):
 	duration = db.Column(db.Integer, nullable=False)
 	# Time stored in "mysterious nanosecond time"
 	time = db.Column(db.Integer, nullable=False)
-	# Allow path to be nullable because we only want to set 
+	# Allow path to be nullable because we only want to set
 	# it once video file is successfully uploaded
 	path = db.Column(db.String(200), nullable=True)
 	tester_id = db.Column(db.Integer, db.ForeignKey('tester.id'), nullable=False)
@@ -25,6 +25,38 @@ class Tester(db.Model):
 	test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
 	pictures = db.relationship('Picture', backref='tester', lazy=True)
 	video = db.relationship("Video", uselist=False, back_populates="tester")
+
+	def get_metadata(self):
+		"""
+		Return tester metadata in dict
+		"""
+		return{
+			'id': self.id,
+			'time': self.time,
+			'phone_manufacturer': self.phone_manufacturer,
+			'phone_model': self.phone_model,
+			'screen_width': self.screen_width,
+			'screen_height': self.screen_height,
+			'picture_count': self.picture_count
+		}
+
+	def get_data(self):
+		"""
+		Return metadata for a tester
+		and paths to all of the video and picture
+		data
+		"""
+
+		data = self.get_metadata()
+		data['video_path'] = self.video.path
+		data['picture_paths'] = {}
+		for picture in self.pictures:
+			data['picture_paths'][picture.pic_num] = picture.path
+		return data
+
+	@property
+	def picture_count(self):
+		return len(self.pictures)
 
 	@property
 	def video_uploaded(self):

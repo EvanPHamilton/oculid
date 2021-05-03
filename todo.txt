@@ -1,5 +1,6 @@
 TODO
 
+-Read data from database
 -Ensure read safety
 -Write tests
 -Try to upload to S3
