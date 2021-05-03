@@ -1,0 +1,6 @@
+TODO
+
+-Fix return pattern in app
+-Write tests
+-Try to upload to S3
+-Package up
