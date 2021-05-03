@@ -16,14 +16,14 @@ SQL_UNIQUENESS_ERROR = "UNIQUE constraint failed: picture.tester_id, picture.tim
 """
 Saving
 """
-def save_pictures_set_pathes(pics_list, tester_id):
+def save_pictures_set_pathes(pics_list, tester_id, tester_folder):
     """
     pic list  -- list of werkzeug.datastructures.FileStorage
     tester_id -- int
     """
     for pic in pics_list:
         pic_number = pic.filename.split(".")[0]
-        path = save_pic(pic, tester_id)
+        path = save_pic(pic, tester_folder)
         set_path(tester_id, pic_number, path)
 
     # Only commit once to avoid
@@ -32,7 +32,7 @@ def save_pictures_set_pathes(pics_list, tester_id):
     return True, "Success"
 
 
-def save_pic(pic, tester_id):
+def save_pic(pic, tester_folder):
     """
     pic       - werkzeug.datastructures.FileStorage
     tester_id - int
@@ -40,7 +40,7 @@ def save_pic(pic, tester_id):
     where it was saved
     """
     filename = secure_filename(pic.filename)
-    path = os.path.join(UPLOAD_FOLDER, filename)
+    path = os.path.join(tester_folder, filename)
     pic.save(path)
     return path
 
@@ -54,9 +54,9 @@ def set_path(tester_id, pic_num, path):
     picture.path = path
 
 
-def save_video(video_file):
+def save_video(video_file, tester_folder):
     filename = secure_filename(video_file.filename)
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    filepath = os.path.join(tester_folder, filename)
     video_file.save(filepath)
     return filepath
 
@@ -78,7 +78,7 @@ def parse_video_json_save_data(video_json, video_path, tester_id):
     video = Video(
     duration=video_json['duration'],
     time=video_json['time'],
-    path=video_path,
+    path=str(video_path),
     tester_id=tester_id)
     db.session.add(video)
     db.session.commit()
@@ -129,8 +129,7 @@ def read_and_save_tester_json(tester_json):
     or
     True, tester_id
     """
-    tester_json.save(os.path.join(UPLOAD_FOLDER,
-        secure_filename(tester_json.filename)))
+
     # tester_json is an open file
     # seek(0) begins reading the file from the begining
     # TODO understand why we are not at the begining to start with
@@ -151,6 +150,11 @@ def read_and_save_tester_json(tester_json):
         test = Test(id=tester['test_id'])
         db.session.add(test)
 
+    # Make test folder if it does not already exist
+    test_folder = os.path.join(UPLOAD_FOLDER, 'test_%s' % tester['test_id'])
+    if not os.path.exists(test_folder):
+        os.makedirs(test_folder)
+
     new_tester = Tester(
     test_id=tester['test_id'],
     time=tester['time'],
@@ -160,7 +164,13 @@ def read_and_save_tester_json(tester_json):
     screen_width=tester['screen_width'])
     db.session.add(new_tester)
     db.session.commit()
-    return True, new_tester.id
+
+    # Each tester get their own data folder inside a given
+    # tests data folder
+    tester_folder = os.path.join(test_folder, str(new_tester.id))
+    os.makedirs(tester_folder)
+
+    return True, (new_tester.id, tester_folder)
 
 """
 Data validation

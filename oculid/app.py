@@ -40,21 +40,28 @@ def upload_file():
             # We may wish to use a more helpful error code in proudction
             abort(418, "Uploaded files do not match expected files")
 
-        video_filepath = save_video(request.files['video.mp4'])
+        # First parse tester.json to create tester and
+        # determine where to save subsequent data
         res, data = read_and_save_tester_json(request.files['tester.json'])
         if not res:
             abort(400, data)
 
-        tester_id = data
+        tester_id, tester_folder = data
+
+        video_filepath = save_video(
+                            request.files['video.mp4'],
+                            tester_folder)
+
         res, data = parse_video_json_save_data(
                         request.files['video.json'],
                         video_filepath,
-                        data)
+                        tester_id)
         if not res:
             abort(400, data)
 
         res, data = parse_pic_json_save_data(
-                        request.files['pics.json'], tester_id)
+                        request.files['pics.json'],
+                        tester_id)
         if not res:
             abort(400, data)
 
@@ -62,7 +69,7 @@ def upload_file():
         # success/failure based off some validation. No validation
         # of pic info yet
         pics_list = request.files.getlist('pics')
-        save_pictures_set_pathes(pics_list, tester_id)
+        save_pictures_set_pathes(pics_list, tester_id, tester_folder)
 
         tester = Tester.query.filter_by(id=tester_id).first()
         if not tester.pictures_uploaded or not tester.video_uploaded:

@@ -6,7 +6,7 @@ class Video(db.Model):
 	duration = db.Column(db.Integer, nullable=False)
 	# Time stored in "mysterious nanosecond time"
 	time = db.Column(db.Integer, nullable=False)
-	path = db.Column(db.String(100), nullable=False)
+	path = db.Column(db.String(200), nullable=False)
 	tester_id = db.Column(db.Integer, db.ForeignKey('tester.id'), nullable=False)
 	tester = db.relationship("Tester", back_populates="video")
 
@@ -63,7 +63,7 @@ class Picture(db.Model):
 	# Allow image path to be null, as we won't set it
 	# till after image is uploaded, and will use this to flag
 	# if image is successfully uploaded
-	path = db.Column(db.String(100))
+	path = db.Column(db.String(200))
 	tester_id = db.Column(db.Integer, db.ForeignKey('tester.id'), nullable=False)
 
 
