@@ -34,13 +34,17 @@ def upload_file():
                 # We might wish to use a more helpful status code in production
                 return 418
         video_filepath = save_video(request.files['video.mp4'])
-        tester_id = parse_and_save_tester_json(request.files['tester.json'])
-        res, err_msg = parse_video_json_save_data(
+        res, data = read_and_save_tester_json(request.files['tester.json'])
+        if not res:
+            res = {"err_msg": data, "result": {"id": None}}
+            return jsonify("Problem parsing tester.json file: %s " % data)
+        tester_id = data
+        res, data = parse_video_json_save_data(
                         request.files['video.json'],
                         video_filepath,
-                        tester_id)
+                        data)
         if not res:
-            return "Problem with video.json file: %s " % err_msg
+            return "Problem with video.json file: %s " % data
 
         res, err_msg = parse_pic_json_save_data(
             request.files['pics.json'], tester_id)

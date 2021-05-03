@@ -35,4 +35,5 @@ with open(path_to_file, 'rb') as f1:
 				print("Elapsed time during upload in seconds:",
                                         t1_stop-t1_start)
 				data = test_response.json()
+				print(data)
 				user_id = data['result']['id']

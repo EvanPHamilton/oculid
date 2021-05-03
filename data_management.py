@@ -149,7 +149,7 @@ def parse_pic_json_save_data(pics_json, tester_id):
     return True, "Pictures successfully added to database"
 
 
-def parse_and_save_tester_json(tester_json):
+def read_and_save_tester_json(tester_json):
     """
     Parse tester_json file uploaded from user
     TODO verify data
@@ -164,9 +164,13 @@ def parse_and_save_tester_json(tester_json):
     # TODO understand why we are not at the begining to start with
     tester_json.seek(0)
     tester = json.loads(tester_json.read())
-    keys = set(tester.keys())
-    if keys != EXPECTED_DATA:
-        return False, "Tester.json does not include all of the required keys"
+
+    # Check that the data looks as we expect
+    res, data = validate_tester_json(tester)
+    logger(res)
+    logger(data)
+    if not res:
+        return res, data
 
     # Open question how we want to handle posting test results
     # for non-existing test. For the sake of not losing data, I will
@@ -177,15 +181,6 @@ def parse_and_save_tester_json(tester_json):
         test = Test(id=tester['test_id'])
         db.session.add(test)
 
-    logger(tester['time'])
-    logger(type(tester['time']))
-    #ValueError: time data '2018-04-21T14:40:15+00:00' does not match format '%Y:%m:%dT%H:%M:%S%z'
-
-    dt = datetime.strptime(tester['time'], '%Y-%m-%dT%H:%M:%S%z')
-    logger(datetime)
-
-    # TODO check that test id exists, store time properly
-
     new_tester = Tester(
     test_id=tester['test_id'],
     time=tester['time'],
@@ -195,4 +190,42 @@ def parse_and_save_tester_json(tester_json):
     screen_width=tester['screen_width'])
     db.session.add(new_tester)
     db.session.commit()
-    return new_tester.id
+    return True, new_tester.id
+
+
+def validate_tester_json(tester):
+    keys = set(tester.keys())
+    if keys != EXPECTED_DATA:
+        return False, "Tester.json does not include all of the required keys"
+
+    try:
+        assert type(tester['test_id']) is int, \
+                    "test_id type not value int"
+        assert type(tester['screen_height']) is int, \
+                    "screen_height type not value int"
+        assert type(tester['screen_width']) is int, \
+                    "screen_width type not value int"
+        assert type(tester['phone_model']) is str, \
+                    "phone_model type not value str"
+        assert type(tester['phone_manufacturer']) is str, \
+                    "phone_manufacturer type not value str"
+    except AssertionError as e:
+        return False, str(e)
+
+    # time represented as '2018-04-21T14:40:15+00:00'
+    # This cannot be parsed by strptime in python 3.5+
+    # stptime expects no ":" in the 4 character timezone offset.
+    # Add the ":" so we can parse/store as a datetime
+    # If we can't reformat into datetime, fail and alert user
+    try:
+        time = tester['time']
+        if time[-3] == ":":
+            time = time[0:-3]+time[-2:]
+        else:
+            raise
+        tester['time'] = datetime.strptime(time, '%Y-%m-%dT%H:%M:%S%z')
+    except Exception as e:
+        # Generally I wouldn't want to except ANY exception
+        return False, "Unable to parse time string into datetime"
+
+    return True, "success"

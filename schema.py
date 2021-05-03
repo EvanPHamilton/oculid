@@ -1,13 +1,10 @@
 from app import db
 
 class Video(db.Model):
-	"""
-	"duration": "",
-	"time": 766679225167732
-	"""
 	__tablename__ = 'video'
 	id = db.Column(db.Integer, primary_key=True)
 	duration = db.Column(db.Integer, nullable=False)
+	# Time stored in "mysterious nanosecond time"
 	time = db.Column(db.Integer, nullable=False)
 	video_path = db.Column(db.String(100), nullable=False)
 	tester_id = db.Column(db.Integer, db.ForeignKey('tester.id'), nullable=False)
@@ -42,6 +39,7 @@ class Picture(db.Model):
 	height = db.Column(db.Integer, nullable=False)
 	width = db.Column(db.Integer, nullable=False)
 	pic_num = db.Column(db.Integer, nullable=False)
+	# Time stored in "mysterious nanosecond time"
 	time = db.Column(db.Integer, nullable=False)
 	# Allow image path to be null, as we won't set it
 	# till after image is uploaded, and will use this to flag
