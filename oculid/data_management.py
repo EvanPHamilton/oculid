@@ -5,8 +5,8 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
-from .schema import Tester, Test, Video, Picture
-from .app import db, UPLOAD_FOLDER, logger
+from oculid.schema import Tester, Test, Video, Picture
+from oculid.app import db, UPLOAD_FOLDER, logger
 
 EXPECTED_DATA = set(['test_id', 'time', 'phone_manufacturer',
             'phone_model', 'screen_height', 'screen_width'])
@@ -123,8 +123,12 @@ def read_and_save_tester_json(tester_json):
     Parse tester_json file uploaded from user
     Save JSON file on filesystem
     Save tester in db
-    """
 
+    Returns
+    False, error message
+    or
+    True, tester_id
+    """
     tester_json.save(os.path.join(UPLOAD_FOLDER,
         secure_filename(tester_json.filename)))
     # tester_json is an open file
