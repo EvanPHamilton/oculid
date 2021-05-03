@@ -170,7 +170,7 @@ def _validate_video_json(video_json):
         assert 'time' in video_json, "Time value no in video.json file"
         assert type(video_json['time']) == int, "Time value not type int"
     except AssertionError as e:
-        return False, e
+        return False, str(e)
     return True, "success"
 
 
