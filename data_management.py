@@ -33,6 +33,7 @@ def save_pic(pic, tester_id):
     pic       - werkzeug.datastructures.FileStorage
     tester_id - int
     Saves an open filestream and returns the path
+    where it was saved
     """
     filename = secure_filename(pic.filename)
     path = os.path.join(UPLOAD_FOLDER, filename)
@@ -47,7 +48,6 @@ def set_path(tester_id, pic_num, path):
     """
     picture = Picture.query.filter_by(tester_id=tester_id, pic_num=pic_num).first()
     picture.image_path = path
-
 
 
 def save_video(video_file):
@@ -137,7 +137,6 @@ def parse_pic_json_save_data(pics_json, tester_id):
                 width=pic['width'],
                 pic_num=pic['pic_num'],
                 time=pic['time'],
-                image_path="/",
                 tester_id=tester_id)
             db.session.add(pic)
             db.session.commit()
@@ -152,7 +151,6 @@ def parse_pic_json_save_data(pics_json, tester_id):
 def read_and_save_tester_json(tester_json):
     """
     Parse tester_json file uploaded from user
-    TODO verify data
     Save JSON file on filesystem
     Save tester in db
     """

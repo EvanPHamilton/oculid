@@ -1,4 +1,4 @@
-from app import db
+from app import db, logger
 
 class Video(db.Model):
 	__tablename__ = 'video'
@@ -12,11 +12,7 @@ class Video(db.Model):
 
 
 class Tester(db.Model):
-	"""
-	TODO store time as datetime not string
-	Don't want to fight with strptime timezone offsets
-	for sake of time.
-	"""
+
 	__tablename__ = 'tester'
 	id = db.Column(db.Integer, primary_key=True)
 	time = db.Column(db.String(40), nullable=False)
@@ -27,6 +23,29 @@ class Tester(db.Model):
 	test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
 	pictures = db.relationship('Picture', backref='tester', lazy=True)
 	video = db.relationship("Video", uselist=False, back_populates="tester")
+
+	@property
+	def video_uploaded(self):
+		"""
+		True/False depending on whether associated video
+		has a path stored in the db. 
+		"""
+		if self.video.image_path:
+			return True
+		return False
+
+
+	@property
+	def pictures_uploaded(self):
+		"""
+		True/False depending on whether each picture associated with a tester
+		has an associated path. False indicates some error in uploading
+		"""
+		for picture in self.pictures:
+			if picture.image_path is None:
+				logger(picture.image_path)
+				return False
+		return True
 
 
 class Picture(db.Model):

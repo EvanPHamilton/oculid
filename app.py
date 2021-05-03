@@ -21,8 +21,7 @@ logger = app.logger.info
 
 # Have to import after creating db app
 from data_management import *
-
-expected_files = ['tester.json', 'video.mp4', 'video.json', 'pics.json', 'pics']
+expected_files = ['tester.json', 'video.mp4', 'video.json', 'pics.json']
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -59,5 +58,9 @@ def upload_file():
             res = {"err_msg": None, "result": {"id": tester_id}}
             return jsonify(res)
 
-        res = {"err_msg": None, "result": {"id": tester_id}}
-        return jsonify(res)
+        tester = Tester.query.filter_by(id=tester_id).first()
+        if not tester.pictures_uploaded or not tester.video_uploaded:
+            res = {"err_msg": None, "result": None}
+        else:
+            res = {"err_msg": None, "result": {"id": tester_id}}
+            return jsonify(res)
