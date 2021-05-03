@@ -48,26 +48,33 @@ def upload_file():
 
         tester_id, tester_folder = data
 
-        video_filepath = save_video(
-                            request.files['video.mp4'],
-                            tester_folder)
-
-        res, data = parse_video_json_save_data(
+        # Parse video.json, then save video file,
+        # then set video path. Separated to make refactoring
+        # with saving to something like S3 in mind.
+        res, data = read_video_json_save_data(
                         request.files['video.json'],
-                        video_filepath,
                         tester_id)
         if not res:
             abort(400, data)
 
+        video_id = data
+        res = save_video_set_path(
+                        request.files['video.mp4'],
+                        video_id,
+                        tester_folder)
+        if not res:
+            abort(400, "Unable to save video.mp4")
+
+
+        # Parse pics.json, then save pic files,
+        # then set pic paths. Separated to make refactoring
+        # with saving to something like S3 in mind.
         res, data = parse_pic_json_save_data(
                         request.files['pics.json'],
                         tester_id)
         if not res:
             abort(400, data)
 
-        # The rest of these calls return True/False to indicate
-        # success/failure based off some validation. No validation
-        # of pic info yet
         pics_list = request.files.getlist('pics')
         save_pictures_set_pathes(pics_list, tester_id, tester_folder)
 

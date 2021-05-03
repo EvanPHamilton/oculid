@@ -6,7 +6,9 @@ class Video(db.Model):
 	duration = db.Column(db.Integer, nullable=False)
 	# Time stored in "mysterious nanosecond time"
 	time = db.Column(db.Integer, nullable=False)
-	path = db.Column(db.String(200), nullable=False)
+	# Allow path to be nullable because we only want to set 
+	# it once video file is successfully uploaded
+	path = db.Column(db.String(200), nullable=True)
 	tester_id = db.Column(db.Integer, db.ForeignKey('tester.id'), nullable=False)
 	tester = db.relationship("Tester", back_populates="video")
 

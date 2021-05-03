@@ -54,14 +54,17 @@ def set_path(tester_id, pic_num, path):
     picture.path = path
 
 
-def save_video(video_file, tester_folder):
+def save_video_set_path(video_file, id, tester_folder):
     filename = secure_filename(video_file.filename)
     filepath = os.path.join(tester_folder, filename)
     video_file.save(filepath)
-    return filepath
+    video = Video.query.filter_by(id=id).first()
+    video.path = filepath
+    db.session.commit()
+    return True
 
 
-def parse_video_json_save_data(video_json, video_path, tester_id):
+def read_video_json_save_data(video_json, tester_id):
     """
     Read in the video.json file,
     Validate the file has the correct information,
@@ -78,12 +81,11 @@ def parse_video_json_save_data(video_json, video_path, tester_id):
     video = Video(
     duration=video_json['duration'],
     time=video_json['time'],
-    path=str(video_path),
     tester_id=tester_id)
     db.session.add(video)
     db.session.commit()
 
-    return True, "Success"
+    return True, video.id
 
 
 def parse_pic_json_save_data(pics_json, tester_id):
