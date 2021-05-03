@@ -1,1 +1,4 @@
 export FLASK_APP=app.py
+
+Need to run: 
+python -m pytest
