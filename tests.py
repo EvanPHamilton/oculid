@@ -8,9 +8,7 @@ path_to_file1 = "/home/evan/oculid/oculid_backend_challenge/data/video.mp4"
 path_to_file2 = "/home/evan/oculid/oculid_backend_challenge/data/video.json"
 path_to_pics_json = "/home/evan/oculid/oculid_backend_challenge/data/pics.json"
 path_to_pic_files = "/home/evan/oculid/oculid_backend_challenge/data/images"
-upload_metadata = "http://127.0.0.1:5000/upload_metadata"
-upload_pictures = "http://127.0.0.1:5000/upload_pictures"
-upload_video = "http://127.0.0.1:5000/upload_video"
+upload_metadata = "http://127.0.0.1:5000/upload"
 
 
 with open(path_to_file, 'rb') as f1:
@@ -34,6 +32,5 @@ with open(path_to_file, 'rb') as f1:
 				t1_stop = perf_counter()
 				print("Elapsed time during upload in seconds:",
                                         t1_stop-t1_start)
-				data = test_response.json()
-				print(data)
-				user_id = data['result']['id']
+				if test_response.status_code != 200:
+					print(test_response.text)
