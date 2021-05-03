@@ -5,13 +5,17 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
-from oculid.schema import Tester, Test, Video, Picture
-from oculid.app import db, UPLOAD_FOLDER, logger
+from .schema import Tester, Test, Video, Picture
+from .app import db, UPLOAD_FOLDER, logger
 
 EXPECTED_DATA = set(['test_id', 'time', 'phone_manufacturer',
             'phone_model', 'screen_height', 'screen_width'])
 SQL_UNIQUENESS_ERROR = "UNIQUE constraint failed: picture.tester_id, picture.time"
 
+
+"""
+Saving
+"""
 def save_pictures_set_pathes(pics_list, tester_id):
     """
     pic list  -- list of werkzeug.datastructures.FileStorage
@@ -57,16 +61,6 @@ def save_video(video_file):
     return filepath
 
 
-def _validate_video_json(video_json):
-    try:
-        assert 'duration' in video_json, "Duration value not in video.json file"
-        assert type(video_json['duration']) == int, "Duration value not type int"
-        assert 'time' in video_json, "Time value no in video.json file"
-        assert type(video_json['time']) == int, "Time value not type int"
-    except AssertionError as e:
-        return False, e
-    return True, "success"
-
 def parse_video_json_save_data(video_json, video_path, tester_id):
     """
     Read in the video.json file,
@@ -91,30 +85,6 @@ def parse_video_json_save_data(video_json, video_path, tester_id):
 
     return True, "Success"
 
-def validate_pic_json(pic):
-    try:
-        assert 'pic_num' in pic, \
-            "Pic num missing from entry in pics.json"
-        assert type(pic['pic_num']) == int, \
-            "Pic num value not type int"
-        assert 'height' in pic, \
-            "Height value missing for pic %s from pics.json" % pic['pic_num']
-        assert type(pic['height']) == int, \
-            "Pic num value not type int for pic %s in pics.json" % pic['pic_num']
-        assert 'width' in pic, \
-            "Width value missing for pic %s from pics.json" % pic['pic_num']
-        assert type(pic['width']) == int, \
-            "Pic num value not type int"
-        assert 'time' in pic, \
-            "Time value missing for pic %s from pics.json" % pic['pic_num']
-        assert type(pic['time']) == int, \
-            "Time value not type for pic %s from pics.json" % pic['pic_num']
-        assert 'image_path' in pic, \
-            "image_path value missing for pic %s in pics.json" % pic['pic_num']
-
-    except AssertionError as e:
-        return False, e
-    return True, "success"
 
 def parse_pic_json_save_data(pics_json, tester_id):
     """
@@ -128,7 +98,7 @@ def parse_pic_json_save_data(pics_json, tester_id):
     pics_json.seek(0)
     pics_json = json.loads(pics_json.read())
     for pic in pics_json:
-        res, err_msg = validate_pic_json(pic)
+        res, err_msg = _validate_pic_json(pic)
         if not res:
             return False, err_msg
         try:
@@ -164,9 +134,7 @@ def read_and_save_tester_json(tester_json):
     tester = json.loads(tester_json.read())
 
     # Check that the data looks as we expect
-    res, data = validate_tester_json(tester)
-    logger(res)
-    logger(data)
+    res, data = _validate_tester_json(tester)
     if not res:
         return res, data
 
@@ -190,8 +158,49 @@ def read_and_save_tester_json(tester_json):
     db.session.commit()
     return True, new_tester.id
 
+"""
+Data validation
+"""
 
-def validate_tester_json(tester):
+
+def _validate_video_json(video_json):
+    try:
+        assert 'duration' in video_json, "Duration value not in video.json file"
+        assert type(video_json['duration']) == int, "Duration value not type int"
+        assert 'time' in video_json, "Time value no in video.json file"
+        assert type(video_json['time']) == int, "Time value not type int"
+    except AssertionError as e:
+        return False, e
+    return True, "success"
+
+
+def _validate_pic_json(pic):
+    try:
+        assert 'pic_num' in pic, \
+            "Pic num missing from entry in pics.json"
+        assert type(pic['pic_num']) == int, \
+            "Pic num value not type int"
+        assert 'height' in pic, \
+            "Height value missing for pic %s from pics.json" % pic['pic_num']
+        assert type(pic['height']) == int, \
+            "Pic num value not type int for pic %s in pics.json" % pic['pic_num']
+        assert 'width' in pic, \
+            "Width value missing for pic %s from pics.json" % pic['pic_num']
+        assert type(pic['width']) == int, \
+            "Pic num value not type int"
+        assert 'time' in pic, \
+            "Time value missing for pic %s from pics.json" % pic['pic_num']
+        assert type(pic['time']) == int, \
+            "Time value not type for pic %s from pics.json" % pic['pic_num']
+        assert 'image_path' in pic, \
+            "image_path value missing for pic %s in pics.json" % pic['pic_num']
+
+    except AssertionError as e:
+        return False, e
+    return True, "success"
+
+
+def _validate_tester_json(tester):
     keys = set(tester.keys())
     if keys != EXPECTED_DATA:
         return False, "Tester.json does not include all of the required keys"

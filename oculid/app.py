@@ -1,8 +1,10 @@
-from flask import Flask, flash, request, redirect, url_for, abort
 import logging
-from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy as alchemy
+
+from flask import Flask, flash, request, redirect, url_for, abort
+from flask_sqlalchemy import SQLAlchemy
 from flask import jsonify
+
 from os import getcwd
 
 

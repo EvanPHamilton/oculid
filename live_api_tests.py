@@ -25,7 +25,6 @@ with open(path_to_file, 'rb') as f1:
 				    ('video.json', f3),
 				    ('pics.json', f4)
 				]
-
 				for file in os.listdir(path_to_pic_files):
 					path_to_picture = os.path.join(path_to_pic_files, file)
 					open_pic_file = open(path_to_picture, "rb")
