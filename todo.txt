@@ -1,7 +1,7 @@
 TODO
 
--Read data from database
--Ensure read safety
+-Ensure read safety -- can't read while being written to
+
+
 -Write tests
--Try to upload to S3
 -Package up
