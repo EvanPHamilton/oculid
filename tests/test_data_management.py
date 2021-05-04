@@ -1,8 +1,53 @@
+import json
+import os
 from oculid import data_management
+
 
 """
 Tests for data management
 """
+
+def test_parse_pic_json_save_data(tmp_path, test_db):
+	"""
+	Test that parse_pic_json_save_data
+	will write to the database
+	"""
+
+	pic=[{
+	"height": 128,
+	"time": 766677100045579,
+	"width": 128,
+	"pic_num": 0,
+	"image_path": "./oculid_backend_challenge/images/0.png"
+	}]
+	tester_id=1
+	filepath = os.path.join(tmp_path, "pics.json")
+	with open(filepath, 'w') as testfile:
+		json.dump(pic, testfile)
+	with open(filepath, 'r') as openfile:
+		res, msg = data_management.parse_pic_json_save_data(openfile, tester_id)
+	assert res
+	assert msg == "Pictures successfully added to database"
+	picture = test_db.session.query(data_management.Picture).first()
+	assert picture.height == 128
+
+
+def test_read_json_file(tmp_path):
+	"""
+	Write a test json file
+	Open it
+	and test that read_json_file
+	returns the contents as a dict
+	"""
+
+	json_data={'id': 10}
+	filepath = os.path.join(tmp_path, "test.json")
+	with open(filepath, 'w') as testfile:
+		json.dump(json_data, testfile)
+
+	with open(filepath, 'r') as openfile:
+		data = data_management._read_json_file(openfile)
+	assert json_data == data
 
 
 # Data validation tests

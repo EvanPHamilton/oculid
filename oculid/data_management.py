@@ -1,5 +1,5 @@
 import os
-
+import sqlalchemy as alchemy
 from flask import json
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -119,9 +119,8 @@ def read_video_json_save_data(video_json, tester_id):
     Create a new video entity in the db
     """
 
-    # Read the file and load as json
-    video_json.seek(0)
-    video_json = json.loads(video_json.read())
+    video_json = _read_json_file(video_json)
+
     res, err_msg = _validate_video_json(video_json)
     if not res:
         return res, err_msg
@@ -144,9 +143,8 @@ def parse_pic_json_save_data(pics_json, tester_id):
     Create new picture entities in the db
     """
 
-    # Read the file and load as json
-    pics_json.seek(0)
-    pics_json = json.loads(pics_json.read())
+    pics_json = _read_json_file(pics_json)
+
     for pic in pics_json:
         res, err_msg = _validate_pic_json(pic)
         if not res:
@@ -168,8 +166,21 @@ def parse_pic_json_save_data(pics_json, tester_id):
     return True, "Pictures successfully added to database"
 
 
+def _read_json_file(open_file):
+    """
+    Reads an open json file
+    and returns contents as dict
+    seek(0) begins reading the file from the begining
+    TODO understand why we are not at the begining to start with
+    """
+    open_file.seek(0)
+    return json.loads(open_file.read())
+
+
 def read_and_save_tester_json(tester_json):
     """
+    tester_json  -- werkzeug.datastructures.FileStorage (open json file)
+
     Parse tester_json file uploaded from user
     Save JSON file on filesystem
     Save tester in db
@@ -180,11 +191,7 @@ def read_and_save_tester_json(tester_json):
     True, tester_id
     """
 
-    # tester_json is an open file
-    # seek(0) begins reading the file from the begining
-    # TODO understand why we are not at the begining to start with
-    tester_json.seek(0)
-    tester = json.loads(tester_json.read())
+    tester = _read_json_file(tester_json)
 
     # Check that the data looks as we expect
     res, data = _validate_tester_json(tester)
