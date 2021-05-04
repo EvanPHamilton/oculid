@@ -69,4 +69,5 @@ print(res.json())
 # Test getting test data
 res = requests.get(get_tests+"/11")
 assert res.status_code == 200
-print(res.text)
+data = res.json()
+print(data)
