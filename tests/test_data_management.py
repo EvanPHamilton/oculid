@@ -1,13 +1,70 @@
 import json
 import os
+import pytest
+import sqlalchemy
+
 from oculid import data_management
 
 
 """
 Tests for data management
+
+Non-exhaustive, but wanting to show how I would go about
+writing tests. For production code would always write tests
 """
 
-def test_parse_pic_json_save_data(tmp_path, test_db):
+
+def test_picture_time_unique(test_db):
+	"""
+	Test that db enforces time being unique for a
+	user's picture
+	"""
+	SAME_TIME = 100
+	SAME_USER_ID = 1
+	pic = data_management.Picture(
+		height=10,
+		width=10,
+		pic_num=1,
+		time=SAME_TIME,
+		tester_id=SAME_USER_ID)
+	pic1 = data_management.Picture(
+		height=10,
+		width=10,
+		pic_num=2,
+		time=SAME_TIME,
+		tester_id=SAME_USER_ID)
+
+	test_db.session.add(pic)
+	test_db.session.commit()
+
+	test_db.session.add(pic1)
+	with pytest.raises(sqlalchemy.exc.IntegrityError):
+		test_db.session.commit()
+
+
+def test_read_video_json_save_data(tmp_path, test_db):
+	"""
+	Test that read_video_json_save_data
+	will write to the database
+	"""
+
+	video={
+	"duration": 1200,
+	"time": 100,
+	}
+	tester_id=1
+	filepath = os.path.join(tmp_path, "pics.json")
+	with open(filepath, 'w') as testfile:
+		json.dump(video, testfile)
+	with open(filepath, 'r') as openfile:
+		res, msg = data_management.read_video_json_save_data(openfile, tester_id)
+	assert res
+	assert msg == 1
+	video = test_db.session.query(data_management.Video).first()
+	assert video.duration == 1200
+
+
+def test_parse_pic_json_save_data_success(tmp_path, test_db):
 	"""
 	Test that parse_pic_json_save_data
 	will write to the database
