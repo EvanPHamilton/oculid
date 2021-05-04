@@ -1,7 +1,4 @@
 TODO
 
--Ensure read safety -- can't read while being written to
-
-
 -Write tests
 -Package up

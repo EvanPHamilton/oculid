@@ -19,6 +19,7 @@ Reading data
 
 def get_testers(test_id):
     """
+    test_id - int
     Return a list of tester ids
     associated with a given test
     or None if test does not exist.
@@ -33,6 +34,7 @@ def get_testers(test_id):
 
 def get_tester_metadata(tester_id):
     """
+    tester_id - int
     Return metadata for a given tester or None
     """
     tester = Tester.query.get(tester_id)
@@ -45,6 +47,7 @@ def get_tester_metadata(tester_id):
 
 def get_tester_data(tester_id):
     """
+    tester_id - int
     Return data for a given tester or None
     """
     tester = Tester.query.get(tester_id)
@@ -61,8 +64,9 @@ Writing data
 
 def save_pictures_set_pathes(pics_list, tester_id, tester_folder):
     """
-    pic list  -- list of werkzeug.datastructures.FileStorage
-    tester_id -- int
+    pic list      -- list of werkzeug.datastructures.FileStorage
+    tester_id     -- int
+    tester_folder -- path to tester's data folder (string)
     """
     for pic in pics_list:
         pic_number = pic.filename.split(".")[0]
@@ -77,8 +81,8 @@ def save_pictures_set_pathes(pics_list, tester_id, tester_folder):
 
 def save_pic(pic, tester_folder):
     """
-    pic       - werkzeug.datastructures.FileStorage
-    tester_id - int
+    pic           - werkzeug.datastructures.FileStorage
+    tester_folder - path to tester's data folder (string)
     Saves an open filestream and returns the path
     where it was saved
     """
@@ -91,6 +95,7 @@ def set_path(tester_id, pic_num, path):
     """
     pic       - werkzeug.datastructures.FileStorage
     tester_id - int
+    pic_num   - int
     Saves an open filestream and returns the path
     """
     picture = Picture.query.filter_by(tester_id=tester_id, pic_num=pic_num).first()
@@ -213,7 +218,8 @@ def read_and_save_tester_json(tester_json):
     # Each tester get their own data folder inside a given
     # tests data folder
     tester_folder = os.path.join(test_folder, str(new_tester.id))
-    os.makedirs(tester_folder)
+    if not os.path.exists(tester_folder):
+        os.makedirs(tester_folder)
 
     return True, (new_tester.id, tester_folder)
 
@@ -242,20 +248,22 @@ def _validate_pic_json(pic):
         assert 'height' in pic, \
             "Height value missing for pic %s from pics.json" % pic['pic_num']
         assert type(pic['height']) == int, \
-            "Pic num value not type int for pic %s in pics.json" % pic['pic_num']
+            "Height value not type int for pic %s in pics.json" % pic['pic_num']
         assert 'width' in pic, \
             "Width value missing for pic %s from pics.json" % pic['pic_num']
         assert type(pic['width']) == int, \
-            "Pic num value not type int"
+            "Width value not type int"
         assert 'time' in pic, \
             "Time value missing for pic %s from pics.json" % pic['pic_num']
         assert type(pic['time']) == int, \
-            "Time value not type for pic %s from pics.json" % pic['pic_num']
+            "Time value not type int for pic %s from pics.json" % pic['pic_num']
         assert 'image_path' in pic, \
             "image_path value missing for pic %s in pics.json" % pic['pic_num']
+        assert type(pic['image_path']) == str, \
+            "image_path value not type string for %s from pics.json" % pic['pic_num']
 
     except AssertionError as e:
-        return False, e
+        return False, str(e)
     return True, "success"
 
 

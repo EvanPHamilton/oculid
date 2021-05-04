@@ -7,15 +7,22 @@ from os import getcwd
 
 cwd = getcwd()
 
+"""
+
+This file tests the api, making requests against the running
+flask application. Should only be run when the flask server is running
+
+"""
+
 BASEPATH = "http://127.0.0.1:5000/"
 path_to_file = os.path.join(cwd,"oculid_backend_challenge/data/tester.json")
 path_to_file1 = os.path.join(cwd,"oculid_backend_challenge/data/video.mp4")
 path_to_file2 = os.path.join(cwd,"oculid_backend_challenge/data/video.json")
 path_to_pics_json = os.path.join(cwd, "oculid_backend_challenge/data/pics.json")
 path_to_pic_files = os.path.join(cwd, "oculid_backend_challenge/data/images")
+
 upload_metadata = os.path.join(BASEPATH, "upload")
 get_tests = os.path.join(BASEPATH, "test")
-
 get_tester_metadata = os.path.join(BASEPATH, "tester", "1", "metadata")
 get_tester_data = os.path.join(BASEPATH, "tester", "1")
 get_tester = os.path.join(BASEPATH, "test")

@@ -91,7 +91,10 @@ class Picture(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	height = db.Column(db.Integer, nullable=False)
 	width = db.Column(db.Integer, nullable=False)
-	pic_num = db.Column(db.Integer, nullable=False)
+	# Cuurrently query images by pic_num when we set their path
+	# so need this to be unique, if we wanted one user multiple tests
+	# we would need to handle this differently.
+	pic_num = db.Column(db.Integer, unique=True, nullable=False)
 	# Time stored in "mysterious nanosecond time"
 	time = db.Column(db.Integer, nullable=False)
 	# Allow image path to be null, as we won't set it
